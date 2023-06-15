@@ -10,10 +10,24 @@ To install xls-format, you need to have Go installed. Then, you can use the foll
 go install github.com/usysrc/xls-format
 ```
 
-## How to use
+## Usage
 
-You can format some columns for example like this:
+To format columns in an Excel file, use the following command format:
 
 ```shell
-xls-format --file sheet.xlsx --start A --end B --format number
+xls-format <file-path> -s <sheet-index> -b <start-column> -e <end-column> -t <format-type>
+```
+
+The available options are as follows:
+
+<file-path>: Path to the Excel file.
+-s, --sheet <sheet-index>: Index of the sheet (starting from 0).
+-b, --start <start-column>: Starting column (e.g., A).
+-e, --end <end-column>: Ending column (e.g., Z).
+-t, --format <format-type>: Column format: text or number.
+
+Example usage:
+
+```shell
+xls-format sheet.xlsx -s 0 -b A -e B --format number
 ```

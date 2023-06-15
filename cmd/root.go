@@ -31,7 +31,6 @@ to quickly create a Cobra application.`,
 
 // Declare the variables used in the format command
 var (
-	filePath     string
 	sheetIndex   int
 	columnStart  string
 	columnEnd    string
@@ -56,20 +55,26 @@ func init() {
 
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
-	rootCmd.Flags().StringVarP(&filePath, "file", "f", "", "Path to the Excel file")
+	rootCmd.SetUsageTemplate(`Usage: xls-format [file-path] [flags]
+Flags:
+  -s, --sheet int         Index of the sheet (starting from 0) (required)
+  -b, --start string      Starting column (e.g., A) (required)
+  -e, --end string        Ending column (e.g., Z) (required)
+  -t, --format string     Column format: text or number (default "text")
+`)
+	rootCmd.Args = cobra.ExactArgs(1) // Expect exactly one argument
 	rootCmd.Flags().IntVarP(&sheetIndex, "sheet", "s", 0, "Index of the sheet (starting from 0)")
 	rootCmd.Flags().StringVarP(&columnStart, "start", "b", "", "Starting column (e.g., A)")
 	rootCmd.Flags().StringVarP(&columnEnd, "end", "e", "", "Ending column (e.g., Z)")
 	rootCmd.Flags().StringVarP(&columnFormat, "format", "t", "text", "Column format: text, number, or date")
 
-	rootCmd.MarkFlagRequired("file")
 	rootCmd.MarkFlagRequired("start")
 	rootCmd.MarkFlagRequired("end")
 
 }
 
 func formatColumns(cmd *cobra.Command, args []string) error {
-	f, err := excelize.OpenFile(filePath)
+	f, err := excelize.OpenFile(args[0])
 	if err != nil {
 		return err
 	}
