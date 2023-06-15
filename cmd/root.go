@@ -6,6 +6,7 @@ package cmd
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"strconv"
 
@@ -68,8 +69,14 @@ Flags:
 	rootCmd.Flags().StringVarP(&columnEnd, "end", "e", "", "Ending column (e.g., Z)")
 	rootCmd.Flags().StringVarP(&columnFormat, "format", "t", "text", "Column format: text, number, or date")
 
-	rootCmd.MarkFlagRequired("start")
-	rootCmd.MarkFlagRequired("end")
+	err := rootCmd.MarkFlagRequired("start")
+	if err != nil {
+		log.Fatal(err)
+	}
+	err = rootCmd.MarkFlagRequired("end")
+	if err != nil {
+		log.Fatal(err)
+	}
 
 }
 
@@ -100,7 +107,7 @@ func formatColumns(cmd *cobra.Command, args []string) error {
 	}
 
 	// Generate the style for the formatting of the cells.
-	format := 2
+	var format int
 	switch columnFormat {
 	case "text":
 		format = 1
