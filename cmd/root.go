@@ -77,7 +77,8 @@ Flags:
 }
 
 func formatColumns(cmd *cobra.Command, args []string) error {
-	f, err := excelize.OpenFile(args[0])
+	filePath := args[0]
+	f, err := excelize.OpenFile(filePath)
 	if err != nil {
 		return err
 	}
@@ -89,7 +90,6 @@ func formatColumns(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	// Calculate the maximum number of rows
 	maxRow := len(rows)
 
 	startColIndex, err := excelize.ColumnNameToNumber(columnStart)
@@ -102,18 +102,11 @@ func formatColumns(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("invalid end column: %s", columnEnd)
 	}
 
-	// Generate the style for the formatting of the cells.
-	var format int
-	switch columnFormat {
-	case "text":
-		format = 1
-	case "number":
-		format = 2
-	case "date":
-		format = 22
-	default:
-		return fmt.Errorf("unsupported column format: %v", columnFormat)
+	format, err := getColumnFormat(columnFormat)
+	if err != nil {
+		return err
 	}
+
 	style, err := f.NewStyle(&excelize.Style{
 		NumFmt: format,
 	})
@@ -124,8 +117,7 @@ func formatColumns(cmd *cobra.Command, args []string) error {
 	for row := 1; row <= maxRow; row++ {
 		for col := startColIndex; col <= endColIndex; col++ {
 			cell := columnNumberToName(col) + strconv.Itoa(row)
-			err = f.SetCellStyle(sheetName, cell, cell, style)
-			if err != nil {
+			if err := f.SetCellStyle(sheetName, cell, cell, style); err != nil {
 				return err
 			}
 		}
@@ -137,6 +129,19 @@ func formatColumns(cmd *cobra.Command, args []string) error {
 
 	fmt.Println("Formatting completed successfully.")
 	return nil
+}
+
+func getColumnFormat(columnFormat string) (int, error) {
+	formats := map[string]int{
+		"text":   1,
+		"number": 2,
+		"date":   22,
+	}
+	format, ok := formats[columnFormat]
+	if !ok {
+		return 0, fmt.Errorf("unsupported column format: %v", columnFormat)
+	}
+	return format, nil
 }
 
 func columnNumberToName(col int) string {
